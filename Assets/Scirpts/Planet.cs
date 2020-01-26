@@ -7,17 +7,27 @@ public enum Belong { PLAYER, ENEMY, NONE };
 public class Planet : MonoBehaviour
 {
     
-    public GameObject soldier;
-    HashSet<Soldier> playerSoldiers = new HashSet<Soldier>();
-    HashSet<Soldier> enemySoldiers = new HashSet<Soldier>();
-    Belong belong = Belong.PLAYER;
-    int level = 1;
-    float radius = 0.5f;
-    // Used to generate soldiers
-    private float waitTime = 2.0f;
-    private float timer = 0.0f;
-    private float visualTime = 0.0f;
-    public Type type = Type.FIRE;
+    public GameObject m_soldier;
+    public List<Soldier> m_playerSoldiers = new List<Soldier>();
+    public List<Soldier> m_enemySoldiers = new List<Soldier>();
+    public int m_playerSoldiersNum = 0;
+    public int m_enemySoldiersNum = 0;
+
+
+
+    // Timer
+    public float m_generateInterval = 2.0f;
+    private float m_generateTimer = 0.0f;
+    public float m_fightInterval = 1.0f;
+    private float m_fightTimer = 0.0f;
+    public float m_occupyInterval = 5.0f;
+    private float m_occupyTimer = 0.0f;
+
+    // Attribute
+    public Belong m_belong = Belong.PLAYER;
+    public int m_level = 1;
+    public Type m_type = Type.FIRE;
+    private float m_radius = 0.5f;
 
     Vector3 randomNormalizedVector()
     {
@@ -27,40 +37,110 @@ public class Planet : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        m_radius = 0.5f * transform.localScale.x;
+        for (int i = 0; i < m_playerSoldiersNum; ++i)
+        {
+            GenerateSoldier(Belong.PLAYER);
+        }
+        for (int i = 0; i < m_enemySoldiersNum; ++i)
+        {
+            GenerateSoldier(Belong.ENEMY);
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
-        timer += Time.deltaTime;
+        m_generateTimer += Time.deltaTime;
+        m_fightTimer += Time.deltaTime;
         // Check if we have reached beyond 2 seconds.
         // Subtracting two is more accurate over time than resetting to zero.
-        if (timer > waitTime)
+        if (m_generateTimer > m_generateInterval)
         {
-            visualTime = timer;
             // Remove the recorded 2 seconds.
-            timer = timer - waitTime;
-
-            generateSoldier();
-
+            m_generateTimer -= m_generateInterval;
+            GenerateSoldier(this.m_belong);
+            
         }
+        if (m_fightTimer > m_fightInterval)
+        {
+            m_fightTimer -= m_fightInterval;
+            Fight();
+        }
+
     }
 
-    void generateSoldier()
+    void GenerateSoldier(Belong belong)
     {
         // Create a new soldier
-        Vector3 randomPosition = randomNormalizedVector() * radius + transform.position;
-        GameObject newSoldierObject = Instantiate(soldier, randomPosition, new Quaternion());
+        Vector3 randomPosition = randomNormalizedVector() * m_radius + transform.position;
+        GameObject newSoldierObject = Instantiate(m_soldier, randomPosition, new Quaternion());
+        newSoldierObject.transform.parent = GameObject.Find("_DynamicSoldiers").transform;
         Soldier newSoldier = newSoldierObject.GetComponent<Soldier>();
-        newSoldier.initAttribute(this.level, this.type, this.belong, this.gameObject);
+        newSoldier.InitAttribute(this.m_level, this.m_type, belong, this.gameObject);
         if (belong == Belong.PLAYER)
         {
-            playerSoldiers.Add(newSoldier);
+            m_playerSoldiers.Add(newSoldier);  
         }
         else
         {
-            enemySoldiers.Add(newSoldier);
+            m_enemySoldiers.Add(newSoldier);
+        }
+    }
+
+    void Fight()
+    {
+        int playerNum = m_playerSoldiers.Count;
+        int enemyNum = m_enemySoldiers.Count;
+        if (playerNum == 0 || enemyNum == 0)
+        {
+            return;
+        }
+
+        // Player attacks Enemy
+        for (int i = 0, j = 0; i < playerNum; ++i, ++j)
+        {
+            // Reset J
+            if (j >= enemyNum)
+            {
+                j = 0;
+            }
+            m_playerSoldiers[i].Attack(m_enemySoldiers[j], this);
+        }
+        // Enemy attacks Player
+        for (int i = 0, j = 0; i < enemyNum; ++i, ++j)
+        {
+            // Reset J
+            if (j >= playerNum)
+            {
+                j = 0;
+            }
+            m_enemySoldiers[i].Attack(m_playerSoldiers[j], this);
+        }
+        
+        // Clear dead soldiers
+        List<Soldier> deadSoldiers = new List<Soldier>();
+        for (int i = playerNum - 1; i >= 0; --i)
+        {
+            Soldier s = m_playerSoldiers[i];
+            if (s.m_health <= 0)
+            {
+                m_playerSoldiers.RemoveAt(i);
+                deadSoldiers.Add(s);
+            }
+        }
+        for (int i = enemyNum - 1; i >= 0; --i)
+        {
+            Soldier s = m_enemySoldiers[i];
+            if (s.m_health <= 0)
+            {
+                m_enemySoldiers.RemoveAt(i);
+                deadSoldiers.Add(s);
+            }
+        }
+        foreach(Soldier s in deadSoldiers)
+        {
+            Destroy(s.gameObject);
         }
     }
 }
