@@ -189,4 +189,20 @@ public class Planet : MonoBehaviour
             SetFlagColorByBelong(m_belong);
         }
     }
+
+    // num = -1 : move all soldiers
+    public void MoveSoldier(Planet target, int num)
+    {
+        foreach(Soldier s in m_playerSoldiers.ToArray())
+        {
+            s.MoveToPlanet(target);
+            m_playerSoldiers.Remove(s);
+        }
+    }
+
+    // Soldier arrives
+    public void Arrive(Soldier s)
+    {
+        m_playerSoldiers.Add(s);
+    }
 }

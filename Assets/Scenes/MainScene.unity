@@ -907,7 +907,7 @@ MeshCollider:
   m_GameObject: {fileID: 1426612440}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Convex: 0
   m_CookingOptions: 14
@@ -1009,13 +1009,9 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 2000498126, guid: a901a94361b8b9e47a134b74d1ab9f0f, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2000498126, guid: a901a94361b8b9e47a134b74d1ab9f0f, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0.5
+    - target: {fileID: 459364076, guid: a901a94361b8b9e47a134b74d1ab9f0f, type: 3}
+      propertyPath: m_playerSoldiersNum
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 1970496960507186115, guid: a901a94361b8b9e47a134b74d1ab9f0f,
         type: 3}
