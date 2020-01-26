@@ -13,21 +13,19 @@ public class Planet : MonoBehaviour
     public int m_playerSoldiersNum = 0;
     public int m_enemySoldiersNum = 0;
 
-
-
     // Timer
     public float m_generateInterval = 2.0f;
     private float m_generateTimer = 0.0f;
     public float m_fightInterval = 1.0f;
     private float m_fightTimer = 0.0f;
-    public float m_occupyInterval = 5.0f;
-    private float m_occupyTimer = 0.0f;
 
     // Attribute
     public Belong m_belong = Belong.PLAYER;
     public int m_level = 1;
     public Type m_type = Type.FIRE;
     private float m_radius = 0.5f;
+
+    GameObject m_flagCube;
 
     Vector3 randomNormalizedVector()
     {
@@ -38,6 +36,8 @@ public class Planet : MonoBehaviour
     void Start()
     {
         m_radius = 0.5f * transform.localScale.x;
+        m_flagCube = this.transform.GetChild(0).gameObject;
+        SetFlagColorByBelong(m_belong);
         for (int i = 0; i < m_playerSoldiersNum; ++i)
         {
             GenerateSoldier(Belong.PLAYER);
@@ -67,11 +67,16 @@ public class Planet : MonoBehaviour
             m_fightTimer -= m_fightInterval;
             Fight();
         }
+        Occupy();
 
     }
 
     void GenerateSoldier(Belong belong)
     {
+        if (belong == Belong.NONE)
+        {
+            return;
+        }
         // Create a new soldier
         Vector3 randomPosition = randomNormalizedVector() * m_radius + transform.position;
         GameObject newSoldierObject = Instantiate(m_soldier, randomPosition, new Quaternion());
@@ -82,7 +87,7 @@ public class Planet : MonoBehaviour
         {
             m_playerSoldiers.Add(newSoldier);  
         }
-        else
+        if (belong == Belong.ENEMY)
         {
             m_enemySoldiers.Add(newSoldier);
         }
@@ -141,6 +146,47 @@ public class Planet : MonoBehaviour
         foreach(Soldier s in deadSoldiers)
         {
             Destroy(s.gameObject);
+        }
+    }
+
+    void SetFlagColorByBelong(Belong belong)
+    {
+        Renderer flagRenderer = m_flagCube.GetComponent<Renderer>();
+        switch (belong)
+        {
+            case Belong.ENEMY:
+                flagRenderer.material.SetColor("_Color", Color.black);
+                break;
+            case Belong.PLAYER:
+                flagRenderer.material.SetColor("_Color", Color.white);
+                break;
+            case Belong.NONE:
+                flagRenderer.material.SetColor("_Color", Color.gray);
+                break;
+        }  
+    }
+
+    void Occupy()
+    {
+        if (m_belong != Belong.PLAYER && m_playerSoldiers.Count >= 10 && m_enemySoldiers.Count == 0)
+        {
+            for (int i = 0; i < 10; ++i)
+            {
+                Destroy(m_playerSoldiers[i].gameObject);
+            }
+            m_playerSoldiers.RemoveRange(0, 10);
+            m_belong = Belong.PLAYER;
+            SetFlagColorByBelong(m_belong);
+        }
+        if (m_belong != Belong.ENEMY && m_enemySoldiers.Count >= 10 && m_playerSoldiers.Count == 0)
+        {
+            for (int i = 0; i < 10; ++i)
+            {
+                Destroy(m_enemySoldiers[i].gameObject);
+            }
+            m_enemySoldiers.RemoveRange(0, 10);
+            m_belong = Belong.ENEMY;
+            SetFlagColorByBelong(m_belong);
         }
     }
 }

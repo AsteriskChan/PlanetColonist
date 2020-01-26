@@ -135,6 +135,18 @@ PrefabInstance:
       propertyPath: m_type
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 459364076, guid: a901a94361b8b9e47a134b74d1ab9f0f, type: 3}
+      propertyPath: m_belong
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 459364076, guid: a901a94361b8b9e47a134b74d1ab9f0f, type: 3}
+      propertyPath: m_playerSoldiersNum
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 459364076, guid: a901a94361b8b9e47a134b74d1ab9f0f, type: 3}
+      propertyPath: m_enemySoldiersNum
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 1970496960507186113, guid: a901a94361b8b9e47a134b74d1ab9f0f,
         type: 3}
       propertyPath: m_Materials.Array.data[0]
@@ -280,7 +292,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 100, y: 196}
+  m_AnchoredPosition: {x: 100, y: 175}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &120976240
@@ -549,7 +561,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 100, y: 120}
+  m_AnchoredPosition: {x: 100, y: 100}
   m_SizeDelta: {x: 160, y: 120}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &782104794
@@ -642,8 +654,8 @@ Camera:
   m_GameObject: {fileID: 963194225}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.118191525, g: 0.18962857, b: 0.3018868, a: 0}
+  m_ClearFlags: 2
+  m_BackGroundColor: {r: 0.70875204, g: 0.70626605, b: 0.78300005, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -660,7 +672,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 8
+  orthographic size: 15
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -885,7 +897,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!64 &1426612441
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -997,6 +1009,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2000498126, guid: a901a94361b8b9e47a134b74d1ab9f0f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2000498126, guid: a901a94361b8b9e47a134b74d1ab9f0f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 1970496960507186115, guid: a901a94361b8b9e47a134b74d1ab9f0f,
         type: 3}
       propertyPath: m_LocalPosition.x
