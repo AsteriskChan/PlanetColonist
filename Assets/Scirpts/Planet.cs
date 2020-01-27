@@ -26,6 +26,8 @@ public class Planet : MonoBehaviour
     private float m_radius = 0.5f;
 
     GameObject m_flagCube;
+    AudioSource m_occupyAudioSource;
+    AudioSource m_moveAudioSource;
 
     Vector3 randomNormalizedVector()
     {
@@ -46,6 +48,9 @@ public class Planet : MonoBehaviour
         {
             GenerateSoldier(Belong.ENEMY);
         }
+        AudioSource[] audios = this.gameObject.GetComponents<AudioSource>();
+        m_occupyAudioSource = audios[0];
+        m_moveAudioSource = audios[1];
     }
 
     // Update is called once per frame
@@ -177,6 +182,7 @@ public class Planet : MonoBehaviour
             m_playerSoldiers.RemoveRange(0, 10);
             m_belong = Belong.PLAYER;
             SetFlagColorByBelong(m_belong);
+            m_occupyAudioSource.Play();
         }
         if (m_belong != Belong.ENEMY && m_enemySoldiers.Count >= 10 && m_playerSoldiers.Count == 0)
         {
@@ -187,6 +193,7 @@ public class Planet : MonoBehaviour
             m_enemySoldiers.RemoveRange(0, 10);
             m_belong = Belong.ENEMY;
             SetFlagColorByBelong(m_belong);
+            m_occupyAudioSource.Play();
         }
     }
 
@@ -198,11 +205,31 @@ public class Planet : MonoBehaviour
             s.MoveToPlanet(target);
             m_playerSoldiers.Remove(s);
         }
+        m_moveAudioSource.Play();
     }
 
     // Soldier arrives
     public void Arrive(Soldier s)
     {
         m_playerSoldiers.Add(s);
+    }
+
+    public void Upgrade()
+    {
+        if (m_belong != Belong.PLAYER)
+        {
+            return;
+        }
+        int playerSoldierNum = m_playerSoldiers.Count;
+        if (playerSoldierNum >= m_level * 10)
+        {
+            for (int i = 0; i < m_level * 10; ++i)
+            {
+                Destroy(m_playerSoldiers[i].gameObject);
+            }
+            m_playerSoldiers.RemoveRange(0, m_level * 10);
+            m_level += 1;
+            return;
+        }
     }
 }

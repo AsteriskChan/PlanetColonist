@@ -6,6 +6,7 @@ public class CameraMove : MonoBehaviour
 {
     const int m_boundary = 20;
     const float m_speed = 10.0f;
+    const float m_scrollSpeed = 20.0f;
 
     // Start is called before the first frame update
     void Start()
@@ -43,22 +44,22 @@ public class CameraMove : MonoBehaviour
         {
             if (camera.orthographic)
             {
-                camera.orthographicSize -= m_speed * Time.deltaTime;
+                camera.orthographicSize -= m_scrollSpeed * Time.deltaTime;
             }
             else
             {
-                position.y -= m_speed * Time.deltaTime;
+                position.y -= m_scrollSpeed * Time.deltaTime;
             }
         }
         if (Input.GetAxis("Mouse ScrollWheel") < 0)
         {
             if (camera.orthographic)
             {
-                camera.orthographicSize += m_speed * Time.deltaTime;
+                camera.orthographicSize += m_scrollSpeed * Time.deltaTime;
             }
             else
             {
-                position.y += m_speed * Time.deltaTime;
+                position.y += m_scrollSpeed * Time.deltaTime;
             }
         }
         transform.position = position;

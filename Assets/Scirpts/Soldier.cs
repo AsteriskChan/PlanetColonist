@@ -84,6 +84,7 @@ public class Soldier : MonoBehaviour
 
         m_health += level * 10;
         m_attack += level * 2;
+        this.gameObject.transform.localScale *= level;
         SetColorByType();
         InitRotate();
     }
@@ -118,7 +119,7 @@ public class Soldier : MonoBehaviour
 
         /* Glow Control */
         //Behaviour halo = (Behaviour)this.gameObject.GetComponent("Halo");
-        //halo.enable = true;
+        //halo.enabled = true;
         //SerializedObject halo = new SerializedObject(this.gameObject.GetComponent("Halo"));
         //halo.FindProperty("m_Size").floatValue += 3f;
         //halo.FindProperty("m_Enabled").boolValue = true;
