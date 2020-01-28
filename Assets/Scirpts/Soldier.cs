@@ -63,6 +63,7 @@ public class Soldier : MonoBehaviour
             else
             {
                 m_moveTimer += m_moveSpeed * Time.deltaTime;
+                //this.gameObject.transform.position += (m_targetPosition - m_startPosition).normalized * m_moveSpeed * Time.deltaTime;
                 transform.position = Vector3.Lerp(m_startPosition, m_targetPosition, m_moveTimer);
                 if (transform.position == m_targetPosition)
                 {
