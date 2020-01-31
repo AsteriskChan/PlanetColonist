@@ -118,21 +118,6 @@ public class Soldier : MonoBehaviour
                 break;
         }
 
-        /* Glow Control */
-        //Behaviour halo = (Behaviour)this.gameObject.GetComponent("Halo");
-        //halo.enabled = true;
-        //SerializedObject halo = new SerializedObject(this.gameObject.GetComponent("Halo"));
-        //halo.FindProperty("m_Size").floatValue += 3f;
-        //halo.FindProperty("m_Enabled").boolValue = true;
-        //if (m_belong == Belong.PLAYER)
-        //{
-        //    halo.FindProperty("m_Color").colorValue = Color.white;
-        //}
-        //else
-        //{
-        //    halo.FindProperty("m_Color").colorValue = Color.black;
-        //}
-        //halo.ApplyModifiedProperties();
         GameObject shell = this.gameObject.transform.GetChild(0).gameObject;
         Renderer childRenderer = shell.GetComponent<Renderer>();
         switch (m_belong)

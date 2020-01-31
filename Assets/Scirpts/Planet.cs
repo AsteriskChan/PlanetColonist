@@ -1,6 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 
 public enum Type { WATER, FIRE, GRASS };
 public enum Belong { PLAYER, ENEMY, NONE };
@@ -12,6 +15,10 @@ public class Planet : MonoBehaviour
     public List<Soldier> m_enemySoldiers = new List<Soldier>();
     public int m_playerSoldiersNum = 0;
     public int m_enemySoldiersNum = 0;
+
+    GameObject m_numberText;
+    GameObject m_global;
+    GameObject m_planetInfoText;
 
     // Timer
     public float m_generateInterval = 2.0f;
@@ -25,13 +32,20 @@ public class Planet : MonoBehaviour
     public Type m_type = Type.FIRE;
     private float m_radius = 0.5f;
 
+    int m_moveNumber = 0;
+    float m_maxDistance = 30;
+
     GameObject m_flagCube;
+    GameObject m_playerCube;
+    GameObject m_enemyCube;
     AudioSource m_occupyAudioSource;
     AudioSource m_moveAudioSource;
 
     Vector3 randomNormalizedVector()
     {
-        return Vector3.Normalize(new Vector3(Random.Range(-1.0f, 1.0f), Random.Range(-1.0f, 1.0f), Random.Range(-1.0f, 1.0f)));
+        return Vector3.Normalize(new Vector3(UnityEngine.Random.Range(-1.0f, 1.0f), 
+            UnityEngine.Random.Range(-1.0f, 1.0f), 
+            UnityEngine.Random.Range(-1.0f, 1.0f)));
     }
 
     // Start is called before the first frame update
@@ -39,6 +53,9 @@ public class Planet : MonoBehaviour
     {
         m_radius = 0.5f * transform.localScale.x;
         m_flagCube = this.transform.GetChild(0).gameObject;
+        m_playerCube = this.transform.GetChild(1).gameObject;
+        m_enemyCube = this.transform.GetChild(2).gameObject;
+
         SetFlagColorByBelong(m_belong);
         for (int i = 0; i < m_playerSoldiersNum; ++i)
         {
@@ -51,6 +68,9 @@ public class Planet : MonoBehaviour
         AudioSource[] audios = this.gameObject.GetComponents<AudioSource>();
         m_occupyAudioSource = audios[0];
         m_moveAudioSource = audios[1];
+        m_global = GameObject.Find("GlobalObject");
+        m_numberText = GameObject.Find("Number Text");
+        m_planetInfoText = GameObject.Find(" Planet Info Text");
     }
 
     // Update is called once per frame
@@ -74,6 +94,11 @@ public class Planet : MonoBehaviour
         }
         Occupy();
 
+    }
+
+    void UpdateBelong()
+    {
+        ;
     }
 
     void GenerateSoldier(Belong belong)
@@ -200,11 +225,17 @@ public class Planet : MonoBehaviour
     // num = -1 : move all soldiers
     public void MoveSoldier(Planet target, int num)
     {
-        foreach(Soldier s in m_playerSoldiers.ToArray())
+        if (m_playerSoldiers.Count <= 0)
         {
-            s.MoveToPlanet(target);
-            m_playerSoldiers.Remove(s);
+            return;
         }
+        num = Math.Min(num, m_playerSoldiers.Count);
+        Debug.Log(num);
+        for (int i = 0; i < num; ++i)
+        {
+            m_playerSoldiers[i].MoveToPlanet(target);
+        }
+        m_playerSoldiers.RemoveRange(0, num);
         m_moveAudioSource.Play();
     }
 
@@ -232,4 +263,69 @@ public class Planet : MonoBehaviour
             return;
         }
     }
+
+    void HighLightPlanet(bool highlight, Color c)
+    {
+        //Behaviour haloBehavior = (Behaviour)g.gameObject.GetComponent("Halo");
+        //haloBehavior.enabled = highlight;
+        SerializedObject halo = new SerializedObject(this.gameObject.GetComponent("Halo"));
+        //halo.FindProperty("m_Size").floatValue += 3f;
+        halo.FindProperty("m_Enabled").boolValue = highlight;
+        halo.FindProperty("m_Color").colorValue = c;
+        halo.ApplyModifiedProperties();
+    }
+
+    private void OnMouseDown()
+    {
+        HighLightPlanet(true, Color.white);
+        m_global.GetComponent<MainGlobal>().UpdateHighlight(this.gameObject);
+        m_moveNumber = 0;
+        m_planetInfoText.GetComponent<PlanetInfo>().SetSelectedPlanet(this);
+    }
+
+    private void OnMouseDrag()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+        if (Physics.Raycast(ray, out hit))
+        {
+            Planet planet = hit.transform.gameObject.GetComponent<Planet>();
+            //Debug.Log("Choose Target" + m_targetPlanet.gameObject.name);
+            if (planet == this)
+            {
+                m_moveNumber = Math.Min(m_moveNumber + 1, m_playerSoldiers.Count);
+                m_numberText.GetComponent<Text>().text = m_moveNumber.ToString();
+            }
+            else
+            {
+                m_moveNumber = Math.Min(m_moveNumber, m_playerSoldiers.Count);
+            }
+
+        }
+        m_numberText.SetActive(true);
+        m_numberText.GetComponent<Text>().text = m_moveNumber.ToString();
+        if (Input.GetMouseButtonDown(1))
+        {
+            m_moveNumber = 0;
+        }
+    }
+
+    private void OnMouseUp()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+        if (Physics.Raycast(ray, out hit))
+        {
+            Planet planet = hit.transform.gameObject.GetComponent<Planet>();
+            //Debug.Log("Choose Target" + m_targetPlanet.gameObject.name);
+            if (planet != this && 
+                Vector3.Distance(planet.transform.position, this.transform.position) < m_maxDistance)
+            {
+                MoveSoldier(planet, m_moveNumber);
+                m_moveNumber = 0;
+            }
+        }
+        m_numberText.SetActive(false);
+    }
+
 }

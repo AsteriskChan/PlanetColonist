@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -9,10 +11,11 @@ public class MainGlobal : MonoBehaviour
     public PlanetInfo m_planetInfo;
     public GameObject m_winCanvas;
     public GameObject m_lossCanvas;
+    public GameObject m_numberText;
     List<GameObject> m_planets;
 
     Planet m_selectedPlanet = null;
-    Planet m_targetPlanet = null;
+    public float m_maxDistance = 30;
 
     public GameObject m_upgradeButton;
     // Start is called before the first frame update
@@ -27,64 +30,37 @@ public class MainGlobal : MonoBehaviour
     void Update()
     {
         WinOrLoss();
-        SelectPlanet();
         ActiveUpgradeButton();
-        ChooseTargetPlanet();
-        Move();
+        m_numberText.transform.position = Input.mousePosition;
     }
 
-    void HighLightPlanet(GameObject g, bool highlight)
+    void HighLightPlanet(GameObject g, bool highlight, Color c)
     {
-        Behaviour halo = (Behaviour)g.gameObject.GetComponent("Halo");
-        halo.enabled = highlight;
+        //Behaviour haloBehavior = (Behaviour)g.gameObject.GetComponent("Halo");
+        //haloBehavior.enabled = highlight;
+        SerializedObject halo = new SerializedObject(g.GetComponent("Halo"));
+        //halo.FindProperty("m_Size").floatValue += 3f;
+        halo.FindProperty("m_Enabled").boolValue = highlight;
+        halo.FindProperty("m_Color").colorValue = c;
+        halo.ApplyModifiedProperties();
     }
 
-    void SelectPlanet()
+    public void UpdateHighlight(GameObject selectedPlanet)
     {
-        if (Input.GetMouseButtonDown(0))
+        foreach (GameObject g in m_planets)
         {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-            if (Physics.Raycast(ray, out hit))
+            if (g == selectedPlanet.gameObject)
             {
-                Debug.Log(hit.transform.gameObject.name);
-                m_selectedPlanet = hit.transform.gameObject.GetComponent<Planet>();
-                m_planetInfo.SetSelectedPlanet(m_selectedPlanet);
-                HighLightPlanet(m_selectedPlanet.gameObject, true);
-                foreach (GameObject g in m_planets)
-                {
-                    if (g != m_selectedPlanet.gameObject)
-                    {
-                        HighLightPlanet(g, false);
-                    }
-                }
+                continue;
             }
-        }
-    }
-
-    void ChooseTargetPlanet()
-    {
-        if (Input.GetMouseButton(0))
-        {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-            if (Physics.Raycast(ray, out hit))
-            {             
-                m_targetPlanet = hit.transform.gameObject.GetComponent<Planet>();
-                //Debug.Log("Choose Target" + m_targetPlanet.gameObject.name);
+            if (Vector3.Distance(g.transform.position, selectedPlanet.transform.position) < m_maxDistance)
+            {
+                HighLightPlanet(g, true, Color.yellow);
             }
-        }
-    }
-
-    void Move()
-    {
-        if (m_selectedPlanet && m_targetPlanet && 
-            m_selectedPlanet != m_targetPlanet &&
-            !Input.GetMouseButton(0))
-        {
-            Debug.Log("Move" + m_targetPlanet.gameObject.name);
-            m_selectedPlanet.MoveSoldier(m_targetPlanet, -1);
-            m_selectedPlanet = m_targetPlanet;
+            else
+            {
+                HighLightPlanet(g, false, Color.white);
+            }
         }
     }
 
@@ -156,4 +132,5 @@ public class MainGlobal : MonoBehaviour
         }
         m_selectedPlanet.Upgrade();
     }
+
 }
