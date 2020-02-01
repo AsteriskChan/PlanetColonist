@@ -44,7 +44,7 @@ public class CameraMove : MonoBehaviour
         {
             if (camera.orthographic)
             {
-                camera.orthographicSize -= m_scrollSpeed * Time.deltaTime;
+                camera.orthographicSize -= m_scrollSpeed * Time.deltaTime * 2;
             }
             else
             {
@@ -55,7 +55,7 @@ public class CameraMove : MonoBehaviour
         {
             if (camera.orthographic)
             {
-                camera.orthographicSize += m_scrollSpeed * Time.deltaTime;
+                camera.orthographicSize += m_scrollSpeed * Time.deltaTime * 2;
             }
             else
             {

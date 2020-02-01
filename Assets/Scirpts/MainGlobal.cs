@@ -30,19 +30,7 @@ public class MainGlobal : MonoBehaviour
     void Update()
     {
         WinOrLoss();
-        ActiveUpgradeButton();
         m_numberText.transform.position = Input.mousePosition;
-    }
-
-    void HighLightPlanet(GameObject g, bool highlight, Color c)
-    {
-        //Behaviour haloBehavior = (Behaviour)g.gameObject.GetComponent("Halo");
-        //haloBehavior.enabled = highlight;
-        SerializedObject halo = new SerializedObject(g.GetComponent("Halo"));
-        //halo.FindProperty("m_Size").floatValue += 3f;
-        halo.FindProperty("m_Enabled").boolValue = highlight;
-        halo.FindProperty("m_Color").colorValue = c;
-        halo.ApplyModifiedProperties();
     }
 
     public void UpdateHighlight(GameObject selectedPlanet)
@@ -51,15 +39,15 @@ public class MainGlobal : MonoBehaviour
         {
             if (g == selectedPlanet.gameObject)
             {
-                continue;
+                g.GetComponent<Planet>().HighLightPlanet(true, false);
             }
-            if (Vector3.Distance(g.transform.position, selectedPlanet.transform.position) < m_maxDistance)
+            else if (Vector3.Distance(g.transform.position, selectedPlanet.transform.position) < m_maxDistance)
             {
-                HighLightPlanet(g, true, Color.yellow);
+                g.GetComponent<Planet>().HighLightPlanet(false, true);
             }
             else
             {
-                HighLightPlanet(g, false, Color.white);
+                g.GetComponent<Planet>().HighLightPlanet(false, false);
             }
         }
     }
@@ -106,31 +94,6 @@ public class MainGlobal : MonoBehaviour
     {
         m_lossCanvas.SetActive(true);
         Time.timeScale = 0;
-    }
-
-    public void ActiveUpgradeButton()
-    {
-        if (!m_selectedPlanet || m_selectedPlanet.m_belong != Belong.PLAYER)
-        {
-            m_upgradeButton.GetComponent<Button>().interactable = false;
-            return;
-        }
-        int level = m_selectedPlanet.m_level;
-        int playerSoldierNum = m_selectedPlanet.m_playerSoldiers.Count;
-        if (playerSoldierNum >= level * 10)
-        {
-            m_upgradeButton.GetComponent<Button>().interactable = true;
-            return;
-        }
-    }
-
-    public void UpgradePlanet()
-    {
-        if (!m_selectedPlanet || m_selectedPlanet.m_belong != Belong.PLAYER)
-        {
-            return;
-        }
-        m_selectedPlanet.Upgrade();
     }
 
 }

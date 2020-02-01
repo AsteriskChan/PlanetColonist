@@ -13,12 +13,17 @@ public class Planet : MonoBehaviour
     public GameObject m_soldier;
     public List<Soldier> m_playerSoldiers = new List<Soldier>();
     public List<Soldier> m_enemySoldiers = new List<Soldier>();
-    public int m_playerSoldiersNum = 0;
-    public int m_enemySoldiersNum = 0;
 
+    public int m_initPlayerSoldiersNum = 0;
+    public int m_initEnemySoldiersNum = 0;
+
+    List<GameObject> m_planets;     // Store all planets
+
+    // Some UI GameObject
     GameObject m_numberText;
     GameObject m_global;
     GameObject m_planetInfoText;
+    GameObject m_upgradeButton;
 
     // Timer
     public float m_generateInterval = 2.0f;
@@ -26,18 +31,23 @@ public class Planet : MonoBehaviour
     public float m_fightInterval = 1.0f;
     private float m_fightTimer = 0.0f;
 
+
     // Attribute
     public Belong m_belong = Belong.PLAYER;
     public int m_level = 1;
     public Type m_type = Type.FIRE;
     private float m_radius = 0.5f;
 
-    int m_moveNumber = 0;
+    private int m_moveNumber = 0;
+    private bool m_addNumber = true;
     float m_maxDistance = 30;
 
-    GameObject m_flagCube;
+    // Some children objects
+    GameObject m_haloObject;    // For target highlight effect
     GameObject m_playerCube;
     GameObject m_enemyCube;
+
+    // Sound Effects
     AudioSource m_occupyAudioSource;
     AudioSource m_moveAudioSource;
 
@@ -52,25 +62,29 @@ public class Planet : MonoBehaviour
     void Start()
     {
         m_radius = 0.5f * transform.localScale.x;
-        m_flagCube = this.transform.GetChild(0).gameObject;
+        m_haloObject = this.transform.GetChild(0).gameObject;
         m_playerCube = this.transform.GetChild(1).gameObject;
         m_enemyCube = this.transform.GetChild(2).gameObject;
 
-        SetFlagColorByBelong(m_belong);
-        for (int i = 0; i < m_playerSoldiersNum; ++i)
+        for (int i = 0; i < m_initPlayerSoldiersNum; ++i)
         {
             GenerateSoldier(Belong.PLAYER);
         }
-        for (int i = 0; i < m_enemySoldiersNum; ++i)
+        for (int i = 0; i < m_initEnemySoldiersNum; ++i)
         {
             GenerateSoldier(Belong.ENEMY);
         }
+
         AudioSource[] audios = this.gameObject.GetComponents<AudioSource>();
         m_occupyAudioSource = audios[0];
         m_moveAudioSource = audios[1];
+
         m_global = GameObject.Find("GlobalObject");
         m_numberText = GameObject.Find("Number Text");
-        m_planetInfoText = GameObject.Find(" Planet Info Text");
+        m_planetInfoText = GameObject.Find("Planet Info Text");
+        m_upgradeButton = GameObject.Find("Upgrade Button");
+
+        m_planets = new List<GameObject>(GameObject.FindGameObjectsWithTag("Planet"));
     }
 
     // Update is called once per frame
@@ -92,13 +106,31 @@ public class Planet : MonoBehaviour
             m_fightTimer -= m_fightInterval;
             Fight();
         }
-        Occupy();
 
+        UpdateBelong();
     }
 
     void UpdateBelong()
     {
-        ;
+        int playerNum = m_playerSoldiers.Count;
+        int enemyNum = m_enemySoldiers.Count;
+        int sumNum = Math.Max(playerNum + enemyNum, 1); // Avoid division by 0
+        Vector3 scale = m_playerCube.transform.localScale;
+        scale.x = (float)playerNum / (float)(sumNum);
+        m_playerCube.transform.localScale = scale;
+        scale = m_enemyCube.transform.localScale;
+        scale.x = (float)enemyNum / (float)(sumNum);
+        m_enemyCube.transform.localScale = scale;
+        if (m_belong != Belong.PLAYER && m_playerSoldiers.Count > 0 && m_enemySoldiers.Count == 0)
+        {
+            m_belong = Belong.PLAYER;
+            m_occupyAudioSource.Play();
+        }
+        else if (m_belong != Belong.ENEMY && m_enemySoldiers.Count > 0 && m_playerSoldiers.Count == 0)
+        {
+            m_belong = Belong.ENEMY;
+            m_occupyAudioSource.Play();
+        }
     }
 
     void GenerateSoldier(Belong belong)
@@ -179,49 +211,6 @@ public class Planet : MonoBehaviour
         }
     }
 
-    void SetFlagColorByBelong(Belong belong)
-    {
-        Renderer flagRenderer = m_flagCube.GetComponent<Renderer>();
-        switch (belong)
-        {
-            case Belong.ENEMY:
-                flagRenderer.material.SetColor("_Color", Color.black);
-                break;
-            case Belong.PLAYER:
-                flagRenderer.material.SetColor("_Color", Color.white);
-                break;
-            case Belong.NONE:
-                flagRenderer.material.SetColor("_Color", Color.gray);
-                break;
-        }  
-    }
-
-    void Occupy()
-    {
-        if (m_belong != Belong.PLAYER && m_playerSoldiers.Count >= 10 && m_enemySoldiers.Count == 0)
-        {
-            for (int i = 0; i < 10; ++i)
-            {
-                Destroy(m_playerSoldiers[i].gameObject);
-            }
-            m_playerSoldiers.RemoveRange(0, 10);
-            m_belong = Belong.PLAYER;
-            SetFlagColorByBelong(m_belong);
-            m_occupyAudioSource.Play();
-        }
-        if (m_belong != Belong.ENEMY && m_enemySoldiers.Count >= 10 && m_playerSoldiers.Count == 0)
-        {
-            for (int i = 0; i < 10; ++i)
-            {
-                Destroy(m_enemySoldiers[i].gameObject);
-            }
-            m_enemySoldiers.RemoveRange(0, 10);
-            m_belong = Belong.ENEMY;
-            SetFlagColorByBelong(m_belong);
-            m_occupyAudioSource.Play();
-        }
-    }
-
     // num = -1 : move all soldiers
     public void MoveSoldier(Planet target, int num)
     {
@@ -242,45 +231,85 @@ public class Planet : MonoBehaviour
     // Soldier arrives
     public void Arrive(Soldier s)
     {
-        m_playerSoldiers.Add(s);
+        if (s.m_belong == Belong.PLAYER)
+        {
+            m_playerSoldiers.Add(s);
+        }
+        if (s.m_belong == Belong.ENEMY)
+        {
+            m_enemySoldiers.Add(s);
+        }
     }
 
-    public void Upgrade()
+    public void Upgrade(Belong belong)
     {
-        if (m_belong != Belong.PLAYER)
+        if (belong == Belong.PLAYER)
         {
-            return;
-        }
-        int playerSoldierNum = m_playerSoldiers.Count;
-        if (playerSoldierNum >= m_level * 10)
-        {
-            for (int i = 0; i < m_level * 10; ++i)
+            int playerSoldierNum = m_playerSoldiers.Count;
+            if (playerSoldierNum >= m_level * 10)
             {
-                Destroy(m_playerSoldiers[i].gameObject);
+                for (int i = 0; i < m_level * 10; ++i)
+                {
+                    Destroy(m_playerSoldiers[i].gameObject);
+                }
+                m_playerSoldiers.RemoveRange(0, m_level * 10);
+                m_level += 1;
+                return;
             }
-            m_playerSoldiers.RemoveRange(0, m_level * 10);
-            m_level += 1;
-            return;
+        }
+        if (belong == Belong.ENEMY)
+        {
+            int enemySoldierNum = m_enemySoldiers.Count;
+            if (enemySoldierNum >= m_level * 10)
+            {
+                for (int i = 0; i < m_level * 10; ++i)
+                {
+                    Destroy(m_enemySoldiers[i].gameObject);
+                }
+                m_enemySoldiers.RemoveRange(0, m_level * 10);
+                m_level += 1;
+                return;
+            }
         }
     }
 
-    void HighLightPlanet(bool highlight, Color c)
+    public void HighLightPlanet(bool isSelected, bool isTarget)
     {
-        //Behaviour haloBehavior = (Behaviour)g.gameObject.GetComponent("Halo");
-        //haloBehavior.enabled = highlight;
-        SerializedObject halo = new SerializedObject(this.gameObject.GetComponent("Halo"));
-        //halo.FindProperty("m_Size").floatValue += 3f;
-        halo.FindProperty("m_Enabled").boolValue = highlight;
-        halo.FindProperty("m_Color").colorValue = c;
-        halo.ApplyModifiedProperties();
+        Behaviour haloBehavior = (Behaviour)this.gameObject.GetComponent("Halo");
+        haloBehavior.enabled = isSelected;
+
+        haloBehavior = (Behaviour)m_haloObject.GetComponent("Halo");
+        haloBehavior.enabled = isTarget;
+    }
+
+    public bool CanUpgrade(Belong belong)
+    {
+        if (belong != m_belong)
+            return false;
+        if (belong == Belong.PLAYER && m_playerSoldiers.Count >= m_level * 10)
+        {
+            return true;
+        }
+        if (belong == Belong.ENEMY && m_enemySoldiers.Count >= m_level * 10)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    IEnumerator waitAddNumber()
+    {
+        yield return new WaitForSeconds(0.1f);
+        m_addNumber = true;
     }
 
     private void OnMouseDown()
     {
-        HighLightPlanet(true, Color.white);
         m_global.GetComponent<MainGlobal>().UpdateHighlight(this.gameObject);
+
         m_moveNumber = 0;
         m_planetInfoText.GetComponent<PlanetInfo>().SetSelectedPlanet(this);
+        m_upgradeButton.GetComponent<UpgradeButton>().SetSelectedPlanet(this);
     }
 
     private void OnMouseDrag()
@@ -291,10 +320,13 @@ public class Planet : MonoBehaviour
         {
             Planet planet = hit.transform.gameObject.GetComponent<Planet>();
             //Debug.Log("Choose Target" + m_targetPlanet.gameObject.name);
-            if (planet == this)
+            if (planet == this && m_addNumber)
             {
-                m_moveNumber = Math.Min(m_moveNumber + 1, m_playerSoldiers.Count);
+                m_addNumber = false;
+
+                m_moveNumber = Math.Min(m_moveNumber + m_moveNumber / 10 + 1, m_playerSoldiers.Count);
                 m_numberText.GetComponent<Text>().text = m_moveNumber.ToString();
+                StartCoroutine(waitAddNumber());
             }
             else
             {
@@ -323,6 +355,8 @@ public class Planet : MonoBehaviour
             {
                 MoveSoldier(planet, m_moveNumber);
                 m_moveNumber = 0;
+                m_global.GetComponent<MainGlobal>().UpdateHighlight(planet.gameObject);
+                m_planetInfoText.GetComponent<PlanetInfo>().SetSelectedPlanet(planet);
             }
         }
         m_numberText.SetActive(false);

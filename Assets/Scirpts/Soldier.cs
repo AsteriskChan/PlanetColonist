@@ -25,7 +25,6 @@ public class Soldier : MonoBehaviour
     float m_moveSpeed = 0.6f;
     float m_moveTimer = 0.0f;
 
-
     Vector3 randomNormalizedVector()
     {
         return Vector3.Normalize(new Vector3(Random.Range(-1.0f, 1.0f), Random.Range(-1.0f, 1.0f), Random.Range(-1.0f, 1.0f)));
@@ -103,30 +102,39 @@ public class Soldier : MonoBehaviour
 
     void SetColorByType()
     {
+        //Renderer renderer = this.gameObject.GetComponent<Renderer>();
+        //switch (m_type)
+        //{
+        //    case Type.WATER:
+        //        Color c = new Color(0, 0, 1, 1);
+        //        renderer.material.SetColor("_Color", c);
+        //        break;
+        //    case Type.GRASS:
+        //        renderer.material.SetColor("_Color", Color.green);
+        //        break;
+        //    case Type.FIRE:
+        //        renderer.material.SetColor("_Color", Color.red);
+        //        break;
+        //}
+        //GameObject shell = this.gameObject.transform.GetChild(0).gameObject;
+        //Renderer childRenderer = shell.GetComponent<Renderer>();
+        //switch (m_belong)
+        //{
+        //    case Belong.PLAYER:
+        //        childRenderer.material.SetColor("_Color", new Color(1, 1, 1, 0.3f));
+        //        break;
+        //    case Belong.ENEMY:
+        //        childRenderer.material.SetColor("_Color", new Color(0, 0, 0, 0.5f));
+        //        break;
+        //}
         Renderer renderer = this.gameObject.GetComponent<Renderer>();
-        switch (m_type)
-        {
-            case Type.WATER:
-                Color c = new Color(0, 0, 1, 1);
-                renderer.material.SetColor("_Color", c);
-                break;
-            case Type.GRASS:
-                renderer.material.SetColor("_Color", Color.green);
-                break;
-            case Type.FIRE:
-                renderer.material.SetColor("_Color", Color.red);
-                break;
-        }
-
-        GameObject shell = this.gameObject.transform.GetChild(0).gameObject;
-        Renderer childRenderer = shell.GetComponent<Renderer>();
         switch (m_belong)
         {
             case Belong.PLAYER:
-                childRenderer.material.SetColor("_Color", new Color(1, 1, 1, 0.3f));
+                renderer.material.SetColor("_Color", Color.red);
                 break;
             case Belong.ENEMY:
-                childRenderer.material.SetColor("_Color", new Color(0, 0, 0, 0.5f));
+                renderer.material.SetColor("_Color", Color.blue);
                 break;
         }
     }

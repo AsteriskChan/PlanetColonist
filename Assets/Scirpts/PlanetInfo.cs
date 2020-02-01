@@ -12,7 +12,8 @@ public class PlanetInfo : MonoBehaviour
     void Start()
     {
         m_text = this.gameObject.GetComponent<Text>();
-        m_text.text = "Type:\nBelonging:\nLevel:\nEnemy Soldiers:\nPlayer Soldiers:\n";
+        // m_text.text = "Type:\nBelonging:\nLevel:\nEnemy Soldiers:\nPlayer Soldiers:\n";
+        m_text.text = "Belonging:\nLevel:\nEnemy Soldiers:\nPlayer Soldiers:\n";
     }
 
     // Update is called once per frame
@@ -43,10 +44,10 @@ public class PlanetInfo : MonoBehaviour
                     belongStr = "Player";
                     break;
                 case Belong.NONE:
-                    belongStr = "Wild";
+                    belongStr = "None";
                     break;
             }
-            m_text.text = "Type:" + typeStr + "\n" + 
+            m_text.text = /*"Type:" + typeStr + "\n" + */
                           "Belonging:" + belongStr + "\n" +
                           "Level:" + m_selectedPlanet.m_level.ToString() + "\n" +
                           "Enemy Soldiers:" + m_selectedPlanet.m_enemySoldiers.Count.ToString() + "\n" +
