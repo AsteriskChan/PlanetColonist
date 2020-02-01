@@ -212,20 +212,38 @@ public class Planet : MonoBehaviour
     }
 
     // num = -1 : move all soldiers
-    public void MoveSoldier(Planet target, int num)
+    public void MoveSoldier(Planet target, int num, Belong belong)
     {
-        if (m_playerSoldiers.Count <= 0)
+        if (belong == Belong.PLAYER)
         {
-            return;
+            if (m_playerSoldiers.Count <= 0)
+            {
+                return;
+            }
+            num = Math.Min(num, m_playerSoldiers.Count);
+            Debug.Log(num);
+            for (int i = 0; i < num; ++i)
+            {
+                m_playerSoldiers[i].MoveToPlanet(target);
+            }
+            m_playerSoldiers.RemoveRange(0, num);
+            m_moveAudioSource.Play();
         }
-        num = Math.Min(num, m_playerSoldiers.Count);
-        Debug.Log(num);
-        for (int i = 0; i < num; ++i)
+        if (belong == Belong.ENEMY)
         {
-            m_playerSoldiers[i].MoveToPlanet(target);
+            if (m_enemySoldiers.Count <= 0)
+            {
+                return;
+            }
+            num = Math.Min(num, m_enemySoldiers.Count);
+            Debug.Log(num);
+            for (int i = 0; i < num; ++i)
+            {
+                m_enemySoldiers[i].MoveToPlanet(target);
+            }
+            m_enemySoldiers.RemoveRange(0, num);
+            m_moveAudioSource.Play();
         }
-        m_playerSoldiers.RemoveRange(0, num);
-        m_moveAudioSource.Play();
     }
 
     // Soldier arrives
@@ -353,7 +371,7 @@ public class Planet : MonoBehaviour
             if (planet != this && 
                 Vector3.Distance(planet.transform.position, this.transform.position) < m_maxDistance)
             {
-                MoveSoldier(planet, m_moveNumber);
+                MoveSoldier(planet, m_moveNumber, Belong.PLAYER);
                 m_moveNumber = 0;
                 m_global.GetComponent<MainGlobal>().UpdateHighlight(planet.gameObject);
                 m_planetInfoText.GetComponent<PlanetInfo>().SetSelectedPlanet(planet);

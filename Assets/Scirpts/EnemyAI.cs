@@ -38,24 +38,38 @@ public class EnemyAI : MonoBehaviour
 
             // Move
             Vector3 pos0 = p0.transform.position;
-            int num0 = p0.m_enemySoldiers.Count;
             foreach (GameObject g1 in m_planets)
             {
+                int num0 = p0.m_enemySoldiers.Count;
                 Planet p1 = g1.GetComponent<Planet>();
                 Vector3 pos1 = p1.transform.position;
                 if (Vector3.Distance(pos0, pos1) > m_maxDistance)
                 {
                     continue;
                 }
-                if (p1.m_belong == Belong.ENEMY)
+                else if (p1.m_belong == Belong.ENEMY)
                 {
                     int num1 = p1.m_enemySoldiers.Count;
                     if (num0 > 2 * num1)
                     {
-                        p0.MoveSoldier(p1, (num1 - num0) / 2);
+                        p0.MoveSoldier(p1, (num0 - num1) / 2, Belong.ENEMY);
+                        break;
                     }
                 }
-                
+                else if (p1.m_belong == Belong.NONE)
+                {
+                    p0.MoveSoldier(p1, num0 / 2, Belong.ENEMY);
+                    break;
+                }
+                else if (p1.m_belong == Belong.PLAYER)
+                {
+                    int num1 = p1.m_playerSoldiers.Count;
+                    if (num0 > num1)
+                    {
+                        p0.MoveSoldier(p1, num0 - 10, Belong.ENEMY);
+                        break;
+                    }
+                }               
             }
         }
     }
