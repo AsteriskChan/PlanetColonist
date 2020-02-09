@@ -342,7 +342,7 @@ public class Planet : MonoBehaviour
             {
                 m_addNumber = false;
 
-                m_moveNumber = Math.Min(m_moveNumber + m_moveNumber / 10 + 1, m_playerSoldiers.Count);
+                m_moveNumber = Math.Min(m_moveNumber + m_moveNumber / 10 + 2, m_playerSoldiers.Count);
                 m_numberText.GetComponent<Text>().text = m_moveNumber.ToString();
                 StartCoroutine(waitAddNumber());
             }

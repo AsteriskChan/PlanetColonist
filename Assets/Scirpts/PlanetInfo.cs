@@ -13,7 +13,7 @@ public class PlanetInfo : MonoBehaviour
     {
         m_text = this.gameObject.GetComponent<Text>();
         // m_text.text = "Type:\nBelonging:\nLevel:\nEnemy Soldiers:\nPlayer Soldiers:\n";
-        m_text.text = "Belonging:\nLevel:\nEnemy Soldiers:\nPlayer Soldiers:\n";
+        m_text.text = "\nLevel:\nEnemy:\nPlayer:\n";
     }
 
     // Update is called once per frame
@@ -48,10 +48,10 @@ public class PlanetInfo : MonoBehaviour
                     break;
             }
             m_text.text = /*"Type:" + typeStr + "\n" + */
-                          "Belonging:" + belongStr + "\n" +
+                          belongStr + "'s planet" + "\n" + 
                           "Level:" + m_selectedPlanet.m_level.ToString() + "\n" +
-                          "Enemy Soldiers:" + m_selectedPlanet.m_enemySoldiers.Count.ToString() + "\n" +
-                          "Player Soldiers:" + m_selectedPlanet.m_playerSoldiers.Count.ToString() + "\n";
+                          "Player:" + m_selectedPlanet.m_playerSoldiers.Count.ToString() + "\n" +
+                          "Enemy:" + m_selectedPlanet.m_enemySoldiers.Count.ToString() + "\n";
         }
     }
 
